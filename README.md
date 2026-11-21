@@ -8,6 +8,8 @@ Es una implementación original: no usa el nombre, el logo ni los recursos de la
 
 | Función de la referencia | Implementación en DriveDeck |
 |---|---|
+| Salpicadero de inicio y diseños de vehículo/marca | ✅ pantalla **Inicio** oscura tipo cockpit, con anillo de velocidad, tarjetas, accesos rápidos y último viaje |
+| Elección de coche al empezar | ✅ **Garaje** de primer arranque (diseño, nombre, marca/modelo, matrícula y color) + editable en Ajustes |
 | Listas IPTV M3U/M3U8 propias, navegación de canales, búsqueda, recarga | ✅ `Cast` → Listas IPTV (parser `#EXTINF`, `group-title`, URLs relativas) |
 | Vídeos locales desde Fotos y desde Archivos | ✅ `Cast` → Vídeos locales (se copian al almacenamiento de la app) |
 | Reproductor con AirPlay / pantalla externa | ✅ `AVPlayer` + selector de rutas de vídeo + render en `UIScreen` externa |
@@ -86,6 +88,7 @@ DriveDeck/DriveDeckApp.swift       lifecycle, pestañas, tema
 DriveDeck/MediaFeature.swift      IPTV, vídeos, webs, AirPlay, pantalla externa
 DriveDeck/DriveFeature.swift      GPS, acelerómetro, viajes, mapas
 DriveDeck/SoundsFeature.swift     sonidos + App Intents
+DriveDeck/VehicleFeature.swift    garaje, onboarding y salpicadero cockpit
 DriveDeck/WidgetsGuideView.swift  guía de widgets
 DriveDeckWidget/DriveDeckWidget.swift  WidgetKit + configuración
 ```

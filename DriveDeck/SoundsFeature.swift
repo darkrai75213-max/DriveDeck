@@ -290,7 +290,7 @@ struct SoundsView: View {
                     Section { Text(message).font(.footnote).foregroundStyle(.secondary) }
                 }
             }
-            .navigationTitle("CarDash · Sonidos")
+            .navigationTitle("DriveDeck · Sonidos")
             .sheet(isPresented: $showingImporter) {
                 DocumentPicker(contentTypes: [.audio], allowsMultiple: false) { urls in
                     if let url = urls.first { sounds.importSound(from: url) }

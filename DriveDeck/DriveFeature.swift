@@ -485,7 +485,7 @@ struct DriveView: View {
                     Section { Text(message).font(.footnote).foregroundStyle(.secondary) }
                 }
             }
-            .navigationTitle("CarDash · Drive")
+            .navigationTitle("DriveDeck · Drive")
             .sheet(isPresented: $showingTerritory) {
                 NavigationStack {
                     TerritoryMap(routes: trips.trips.map { $0.points.map(\.clLocation) })

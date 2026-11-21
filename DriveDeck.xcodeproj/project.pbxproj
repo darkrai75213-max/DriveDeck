@@ -14,6 +14,7 @@
 		AA0000000000000000000305 /* WidgetsGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000105 /* WidgetsGuideView.swift */; };
 		AA0000000000000000000320 /* DriveDeckWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000021 /* DriveDeckWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		AA0000000000000000000401 /* DriveDeckWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000201 /* DriveDeckWidget.swift */; };
+		AA0000000000000000000306 /* VehicleFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000108 /* VehicleFeature.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +51,7 @@
 		AA0000000000000000000105 /* WidgetsGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetsGuideView.swift; sourceTree = "<group>"; };
 		AA0000000000000000000106 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0000000000000000000107 /* DriveDeck.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DriveDeck.entitlements; sourceTree = "<group>"; };
+		AA0000000000000000000108 /* VehicleFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleFeature.swift; sourceTree = "<group>"; };
 		AA0000000000000000000201 /* DriveDeckWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveDeckWidget.swift; sourceTree = "<group>"; };
 		AA0000000000000000000202 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0000000000000000000203 /* DriveDeckWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DriveDeckWidget.entitlements; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 				AA0000000000000000000103 /* DriveFeature.swift */,
 				AA0000000000000000000104 /* SoundsFeature.swift */,
 				AA0000000000000000000105 /* WidgetsGuideView.swift */,
+				AA0000000000000000000108 /* VehicleFeature.swift */,
 				AA0000000000000000000106 /* Info.plist */,
 				AA0000000000000000000107 /* DriveDeck.entitlements */,
 			);
@@ -217,6 +220,7 @@
 				AA0000000000000000000303 /* DriveFeature.swift in Sources */,
 				AA0000000000000000000304 /* SoundsFeature.swift in Sources */,
 				AA0000000000000000000305 /* WidgetsGuideView.swift in Sources */,
+				AA0000000000000000000306 /* VehicleFeature.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

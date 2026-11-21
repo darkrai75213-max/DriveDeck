@@ -633,7 +633,7 @@ struct CastView: View {
                     Section { Text(status).font(.footnote).foregroundStyle(.secondary) }
                 }
             }
-            .navigationTitle("CarDash · Cast")
+            .navigationTitle("DriveDeck · Cast")
             .sheet(isPresented: $showingPlaylistInput) {
                 InputSheet(title: "Lista IPTV", placeholder: "https://ejemplo.com/lista.m3u8", text: $playlistURL) {
                     Task { await media.addPlaylist(urlString: playlistURL); playlistURL = "" }

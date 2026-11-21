@@ -64,30 +64,62 @@ enum AppAccent: String, CaseIterable, Identifiable {
 }
 
 struct ContentView: View {
-    @AppStorage("drivedeck.accent") private var accentRaw: String = "blue"
+    @StateObject private var vehicles = VehicleStore.shared
+    @State private var selectedTab = 0
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
+            HomeView(selectedTab: $selectedTab)
+                .tabItem { Label("Inicio", systemImage: "gauge.with.dots.needle.50percent") }
+                .tag(0)
             CastView()
                 .tabItem { Label("Cast", systemImage: "tv") }
+                .tag(1)
             DriveView()
                 .tabItem { Label("Drive", systemImage: "car.fill") }
+                .tag(2)
             WidgetsGuideView()
                 .tabItem { Label("Widgets", systemImage: "square.grid.2x2") }
+                .tag(3)
             SoundsView()
                 .tabItem { Label("Sonidos", systemImage: "speaker.wave.2") }
+                .tag(4)
             SettingsView()
                 .tabItem { Label("Ajustes", systemImage: "gearshape") }
+                .tag(5)
+        }
+        .environmentObject(vehicles)
+        .fullScreenCover(isPresented: Binding(
+            get: { vehicles.needsSetup },
+            set: { _ in }
+        )) {
+            GarageSetupView()
+                .environmentObject(vehicles)
         }
     }
 }
 
 struct SettingsView: View {
     @AppStorage("drivedeck.accent") private var accentRaw: String = "blue"
+    @EnvironmentObject private var vehicles: VehicleStore
+    @State private var showingGarage = false
 
     var body: some View {
         NavigationStack {
             List {
+                Section("Garaje") {
+                    Button {
+                        showingGarage = true
+                    } label: {
+                        HStack {
+                            Image(systemName: vehicles.vehicle?.design.icon ?? "car.fill")
+                            Text(vehicles.vehicle?.nickname ?? "Elegir vehículo")
+                            Spacer()
+                            Text(vehicles.vehicle?.design.title ?? "")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
                 Section("Apariencia") {
                     Picker("Color", selection: $accentRaw) {
                         ForEach(AppAccent.allCases) { item in
@@ -105,6 +137,10 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Ajustes")
+            .sheet(isPresented: $showingGarage) {
+                GarageSetupView(vehicle: vehicles.vehicle)
+                    .environmentObject(vehicles)
+            }
         }
     }
 }
