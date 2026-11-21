@@ -8,6 +8,7 @@ Es una implementación original: no usa el nombre, el logo ni los recursos de la
 
 | Función de la referencia | Implementación en DriveDeck |
 |---|---|
+| Icono de la app | ✅ icono original de 1024×1024: silueta de hatchback deportivo genérico sobre degradado oscuro con halo rojo (sin logos de marca) |
 | Salpicadero de inicio y diseños de vehículo/marca | ✅ pantalla **Inicio** oscura tipo cockpit, con anillo de velocidad, tarjetas, accesos rápidos y último viaje |
 | Elección de coche al empezar | ✅ **SEAT Ibiza por defecto** (nickname "Mi Ibiza", diseño deportivo, acento rojo). Se puede cambiar en el Garaje y hay un atajo "Usar SEAT Ibiza". |
 | "Mis datos" con icono del coche | ✅ pestaña **Mis datos** con insignia del Ibiza, ficha (marca/modelo, matrícula, diseño, color) y estadísticas |

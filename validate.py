@@ -84,6 +84,20 @@ for key in ["UIBackgroundModes", "NSLocationAlwaysAndWhenInUseUsageDescription",
     if key not in app_plist:
         errors.append(f"Falta {key} en Info.plist")
 
+# 8. CFBundleExecutable presente en ambos plists (Sideloadly lo exige)
+for rel in ["DriveDeck/Info.plist", "DriveDeckWidget/Info.plist"]:
+    data = plistlib.loads((ROOT / rel).read_bytes())
+    exe = data.get("CFBundleExecutable")
+    if not exe:
+        errors.append(f"Falta CFBundleExecutable en {rel}")
+
+# 9. Icono de la app
+icon = ROOT / "DriveDeck" / "Assets.xcassets" / "AppIcon.appiconset" / "AppIcon-1024.png"
+if not icon.exists() or icon.stat().st_size < 10_000:
+    errors.append("Falta el icono AppIcon-1024.png")
+if "ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon" not in pbx:
+    errors.append("Falta ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon en el pbxproj")
+
 # Resultado
 print(f"Revisados {len(list(ROOT.rglob('*.swift')))} archivos Swift, {len(refs)} referencias de proyecto.")
 for warning in warnings:

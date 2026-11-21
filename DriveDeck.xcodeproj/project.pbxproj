@@ -15,6 +15,7 @@
 		AA0000000000000000000320 /* DriveDeckWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000021 /* DriveDeckWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		AA0000000000000000000401 /* DriveDeckWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000201 /* DriveDeckWidget.swift */; };
 		AA0000000000000000000306 /* VehicleFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000108 /* VehicleFeature.swift */; };
+		AA0000000000000000000307 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000109 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 		AA0000000000000000000106 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0000000000000000000107 /* DriveDeck.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DriveDeck.entitlements; sourceTree = "<group>"; };
 		AA0000000000000000000108 /* VehicleFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleFeature.swift; sourceTree = "<group>"; };
+		AA0000000000000000000109 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA0000000000000000000201 /* DriveDeckWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveDeckWidget.swift; sourceTree = "<group>"; };
 		AA0000000000000000000202 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0000000000000000000203 /* DriveDeckWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DriveDeckWidget.entitlements; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 				AA0000000000000000000104 /* SoundsFeature.swift */,
 				AA0000000000000000000105 /* WidgetsGuideView.swift */,
 				AA0000000000000000000108 /* VehicleFeature.swift */,
+				AA0000000000000000000109 /* Assets.xcassets */,
 				AA0000000000000000000106 /* Info.plist */,
 				AA0000000000000000000107 /* DriveDeck.entitlements */,
 			);
@@ -198,6 +201,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA0000000000000000000307 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,6 +250,7 @@
 		AA0000000000000000000031 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = DriveDeck/DriveDeck.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -265,6 +270,7 @@
 		AA0000000000000000000032 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = DriveDeck/DriveDeck.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

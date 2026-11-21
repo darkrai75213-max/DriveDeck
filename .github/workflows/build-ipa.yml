@@ -60,6 +60,10 @@ jobs:
             echo "ERROR: CFBundleExecutable del widget no válido"
             exit 1
           }
+          ls Payload/DriveDeck.app/AppIcon*.png >/dev/null 2>&1 || {
+            echo "ERROR: el icono de la app no quedó incluido"
+            exit 1
+          }
           rm -f DriveDeck.ipa
           zip -qry DriveDeck.ipa Payload
           ls -lh DriveDeck.ipa
