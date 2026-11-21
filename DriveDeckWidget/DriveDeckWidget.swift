@@ -60,25 +60,25 @@ struct WidgetConfigIntent: AppIntent, WidgetConfigurationIntent {
     static let description: IntentDescription? = IntentDescription("Elige el estilo y el diseño del widget.")
 
     @Parameter(title: "Estilo")
-    var style: WidgetStyle
+    var style: WidgetStyle?
 
     @Parameter(title: "Diseño")
-    var brand: BrandTheme
+    var brand: BrandTheme?
 
     @Parameter(title: "Color")
-    var tint: WidgetTint
+    var tint: WidgetTint?
 
     @Parameter(title: "Matrícula")
-    var plate: String
+    var plate: String?
 
     @Parameter(title: "Título")
-    var title: String
+    var title: String?
 
     @Parameter(title: "Cuenta atrás")
-    var countdown: Date
+    var countdown: Date?
 
-    // Los valores por defecto se asignan aquí: el inicializador de @Parameter
-    // con `default:` solo existe a partir de iOS 18 y el proyecto soporta iOS 17.
+    // WidgetConfigurationIntent exige parámetros opcionales. Los valores por
+    // defecto se resuelven aquí para que el widget nunca quede vacío.
     init() {
         style = .clock
         brand = .neutral
@@ -88,6 +88,19 @@ struct WidgetConfigIntent: AppIntent, WidgetConfigurationIntent {
         countdown = Calendar.current.date(byAdding: .day, value: 1, to: Date())
             ?? Date().addingTimeInterval(86_400)
     }
+
+    var resolvedStyle: WidgetStyle { style ?? .clock }
+    var resolvedBrand: BrandTheme { brand ?? .neutral }
+    var resolvedTint: WidgetTint { tint ?? .blue }
+    var resolvedPlate: String {
+        let value = plate?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return value.isEmpty ? "ABC 123" : value
+    }
+    var resolvedTitle: String {
+        let value = title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return value.isEmpty ? "DriveDeck" : value
+    }
+    var resolvedCountdown: Date { countdown ?? Date().addingTimeInterval(86_400) }
 }
 
 // MARK: - Timeline
@@ -123,7 +136,7 @@ struct WidgetEntryView: View {
 
     var body: some View {
         Group {
-            switch entry.config.style {
+            switch entry.config.resolvedStyle {
             case .clock:
                 ClockWidget(entry: entry)
             case .date:
@@ -138,7 +151,7 @@ struct WidgetEntryView: View {
         }
         .containerBackground(for: .widget) {
             LinearGradient(
-                colors: [entry.config.tint.color.opacity(0.28), Color.black.opacity(0.55)],
+                colors: [entry.config.resolvedTint.color.opacity(0.28), Color.black.opacity(0.55)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -161,10 +174,10 @@ struct ClockWidget: View {
             Spacer(minLength: 0)
             HStack {
                 Image(systemName: "car.fill")
-                Text(entry.config.title)
+                Text(entry.config.resolvedTitle)
                     .font(.caption2)
             }
-            .foregroundStyle(entry.config.tint.color)
+            .foregroundStyle(entry.config.resolvedTint.color)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -179,12 +192,12 @@ struct DateWidget: View {
         VStack(spacing: 6) {
             Image(systemName: "car.display.fill")
                 .font(.title2)
-                .foregroundStyle(entry.config.tint.color)
+                .foregroundStyle(entry.config.resolvedTint.color)
             Text(entry.date.formatted(.dateTime.weekday(.wide).day().month(.wide)))
                 .font(.headline.bold())
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.6)
-            Text(entry.config.title)
+            Text(entry.config.resolvedTitle)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -197,13 +210,13 @@ struct CountdownWidget: View {
 
     private var components: DateComponents {
         let calendar = Calendar.current
-        let seconds = max(0, Int(entry.config.countdown.timeIntervalSince(entry.date)))
+        let seconds = max(0, Int(entry.config.resolvedCountdown.timeIntervalSince(entry.date)))
         return calendar.dateComponents([.day, .hour, .minute], from: Date(), to: Date().addingTimeInterval(TimeInterval(seconds)))
     }
 
     var body: some View {
         VStack(spacing: 8) {
-            Text(entry.config.title)
+            Text(entry.config.resolvedTitle)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
@@ -213,7 +226,7 @@ struct CountdownWidget: View {
                 CountBox(value: components.minute ?? 0, label: "m")
             }
             Spacer(minLength: 0)
-            Text(entry.config.countdown.formatted(date: .abbreviated, time: .shortened))
+            Text(entry.config.resolvedCountdown.formatted(date: .abbreviated, time: .shortened))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -245,7 +258,7 @@ struct PlateWidget: View {
     var body: some View {
         VStack(spacing: 10) {
             Spacer(minLength: 0)
-            Text(entry.config.plate)
+            Text(entry.config.resolvedPlate)
                 .font(.system(size: 26, weight: .heavy, design: .monospaced))
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
@@ -254,10 +267,10 @@ struct PlateWidget: View {
                 .background(Color.white, in: RoundedRectangle(cornerRadius: 8))
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(entry.config.tint.color, lineWidth: 3)
+                        .stroke(entry.config.resolvedTint.color, lineWidth: 3)
                 )
                 .foregroundStyle(.black)
-            Text(entry.config.title)
+            Text(entry.config.resolvedTitle)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -269,7 +282,7 @@ struct BrandWidget: View {
     let entry: WidgetEntry
 
     private var subtitle: String {
-        switch entry.config.brand {
+        switch entry.config.resolvedBrand {
         case .neutral: return "Everyday"
         case .sport: return "Performance"
         case .luxury: return "Premium"
@@ -280,17 +293,17 @@ struct BrandWidget: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Image(systemName: entry.config.brand == .electric ? "bolt.car.fill" : "car.fill")
+                Image(systemName: entry.config.resolvedBrand == .electric ? "bolt.car.fill" : "car.fill")
                     .font(.largeTitle)
-                    .foregroundStyle(entry.config.tint.color)
+                    .foregroundStyle(entry.config.resolvedTint.color)
                 Spacer()
-                if entry.config.brand == .sport {
+                if entry.config.resolvedBrand == .sport {
                     Image(systemName: "gauge.with.dots.needle.33percent")
                         .foregroundStyle(.secondary)
                 }
             }
             Spacer(minLength: 0)
-            Text(entry.config.title)
+            Text(entry.config.resolvedTitle)
                 .font(.headline.bold())
                 .lineLimit(1)
             Text(subtitle)
