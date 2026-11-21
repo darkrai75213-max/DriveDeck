@@ -9,6 +9,11 @@ Es una implementación original: no usa el nombre, el logo ni los recursos de la
 | Función de la referencia | Implementación en DriveDeck |
 |---|---|
 | Icono de la app | ✅ icono original de 1024×1024: silueta de hatchback deportivo genérico sobre degradado oscuro con halo rojo (sin logos de marca) |
+| Estructura inferior como CarDash | ✅ pestañas **transmitir · recorrido · widgets · sonidos · perfil** |
+| Transmitir | ✅ cuatro secciones: **fuente multimedia**, **videos locales**, **duplicar iphone** y **navegador**, con IPTV, importación de vídeos, AirPlay y webs |
+| Recorrido | ✅ detección automática al conducir, rutas con distancia/duración/velocidad máxima, silueta del mapa, telemetría completa del iPhone (curvas izq/der, frenazos, acelerones, G, giroscopio, altitud, pasos y más) y notificación al terminar cada viaje |
+| Perfil | ✅ tarjeta del **SEAT Ibiza** con foto del Ibiza 40 Aniversario 2024 de 16", km totales, viajes, logros **0/16** y ajustes (detección automática, siempre km/h, color) |
+| Widgets con fotos | ✅ estilo «Foto» que se configura directamente en el widget desde la galería (firma gratuita, sin App Groups) |
 | Salpicadero de inicio y diseños de vehículo/marca | ✅ pantalla **Inicio** oscura tipo cockpit, con anillo de velocidad, tarjetas, accesos rápidos y último viaje |
 | Elección de coche al empezar | ✅ **SEAT Ibiza por defecto** (nickname "Mi Ibiza", diseño deportivo, acento rojo). Se puede cambiar en el Garaje y hay un atajo "Usar SEAT Ibiza". |
 | "Mis datos" con icono del coche | ✅ pestaña **Mis datos** con insignia del Ibiza, ficha (marca/modelo, matrícula, diseño, color) y estadísticas |
