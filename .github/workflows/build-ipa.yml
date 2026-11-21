@@ -1,0 +1,63 @@
+name: Build IPA (unsigned, para sideload)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ver Xcode
+        run: xcodebuild -version && xcode-select -p
+
+      - name: Compilar app + widget sin firma
+        run: |
+          xcodebuild \
+            -project DriveDeck.xcodeproj \
+            -scheme DriveDeck \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$GITHUB_WORKSPACE/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            SWIFT_STRICT_CONCURRENCY=minimal \
+            build
+
+      - name: Empaquetar IPA
+        run: |
+          set -euo pipefail
+          APP="$GITHUB_WORKSPACE/build/Build/Products/Release-iphoneos/DriveDeck.app"
+          WIDGET="$GITHUB_WORKSPACE/build/Build/Products/Release-iphoneos/DriveDeckWidget.appex"
+          if [ ! -d "$APP" ]; then
+            echo "No se encontró $APP"
+            find "$GITHUB_WORKSPACE/build" -maxdepth 6 -name '*.app' -print
+            exit 1
+          fi
+          rm -rf Payload
+          mkdir -p Payload
+          cp -R "$APP" Payload/DriveDeck.app
+          mkdir -p Payload/DriveDeck.app/PlugIns
+          if [ ! -d Payload/DriveDeck.app/PlugIns/DriveDeckWidget.appex ] && [ -d "$WIDGET" ]; then
+            cp -R "$WIDGET" Payload/DriveDeck.app/PlugIns/DriveDeckWidget.appex
+          fi
+          test -d Payload/DriveDeck.app/PlugIns/DriveDeckWidget.appex || {
+            echo "ERROR: la extensión del widget no quedó embebida"
+            exit 1
+          }
+          rm -f DriveDeck.ipa
+          zip -qry DriveDeck.ipa Payload
+          ls -lh DriveDeck.ipa
+
+      - name: Subir IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: DriveDeck-IPA
+          path: DriveDeck.ipa
+          if-no-files-found: error
+          retention-days: 30
