@@ -95,6 +95,9 @@ for rel in ["DriveDeck/Info.plist", "DriveDeckWidget/Info.plist"]:
 icon = ROOT / "DriveDeck" / "Assets.xcassets" / "AppIcon.appiconset" / "AppIcon-1024.png"
 if not icon.exists() or icon.stat().st_size < 10_000:
     errors.append("Falta el icono AppIcon-1024.png")
+for needed in ["Icon-60@3x.png", "Icon-60@2x.png", "Icon-1024.png"]:
+    if not (icon.parent / needed).exists():
+        errors.append(f"Falta el tamaño de icono {needed}")
 if "ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon" not in pbx:
     errors.append("Falta ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon en el pbxproj")
 
