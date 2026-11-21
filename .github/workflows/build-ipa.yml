@@ -50,6 +50,16 @@ jobs:
             echo "ERROR: la extensión del widget no quedó embebida"
             exit 1
           }
+          APP_EXE=$(plutil -extract CFBundleExecutable raw -o - Payload/DriveDeck.app/Info.plist)
+          test -n "$APP_EXE" && test -f "Payload/DriveDeck.app/$APP_EXE" || {
+            echo "ERROR: CFBundleExecutable de la app no válido"
+            exit 1
+          }
+          WIDGET_EXE=$(plutil -extract CFBundleExecutable raw -o - Payload/DriveDeck.app/PlugIns/DriveDeckWidget.appex/Info.plist)
+          test -n "$WIDGET_EXE" && test -f "Payload/DriveDeck.app/PlugIns/DriveDeckWidget.appex/$WIDGET_EXE" || {
+            echo "ERROR: CFBundleExecutable del widget no válido"
+            exit 1
+          }
           rm -f DriveDeck.ipa
           zip -qry DriveDeck.ipa Payload
           ls -lh DriveDeck.ipa
