@@ -93,7 +93,17 @@ final class VehicleStore: ObservableObject {
     private let key = "drivedeck.vehicle"
 
     init() {
-        guard let data = UserDefaults.standard.data(forKey: key) else { return }
+        guard let data = UserDefaults.standard.data(forKey: key) else {
+            // Valor por defecto: solo tú usas la app.
+            vehicle = Vehicle(
+                nickname: "Mi Ibiza",
+                brandModel: "SEAT Ibiza",
+                plate: "",
+                design: .sport,
+                accentRaw: "red"
+            )
+            return
+        }
         vehicle = try? JSONDecoder().decode(Vehicle.self, from: data)
     }
 
@@ -298,6 +308,20 @@ struct GarageSetupView: View {
                                 .font(.caption.weight(.bold))
                                 .foregroundStyle(.secondary)
 
+                            Button {
+                                nickname = "Mi Ibiza"
+                                brandModel = "SEAT Ibiza"
+                                design = .sport
+                                accentRaw = "red"
+                            } label: {
+                                Label("Usar SEAT Ibiza", systemImage: "car.sport.fill")
+                                    .font(.subheadline.bold())
+                                    .frame(maxWidth: .infinity)
+                                    .padding(10)
+                                    .background(Color.red.opacity(0.18), in: RoundedRectangle(cornerRadius: 12))
+                            }
+                            .buttonStyle(.plain)
+
                             TextField("Nombre (Mi coche)", text: $nickname)
                                 .textFieldStyle(.roundedBorder)
                             TextField("Marca y modelo (opcional)", text: $brandModel)
@@ -356,6 +380,132 @@ struct GarageSetupView: View {
                 .padding()
             }
         }
+    }
+}
+
+// MARK: - Mis datos
+
+struct VehicleBadge: View {
+    let vehicle: Vehicle
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [vehicle.accent, vehicle.accent.opacity(0.35)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            Image(systemName: vehicle.design.icon)
+                .font(.system(size: 54))
+                .foregroundStyle(.white)
+        }
+        .frame(width: 116, height: 116)
+        .clipShape(RoundedRectangle(cornerRadius: 28))
+        .overlay(
+            RoundedRectangle(cornerRadius: 28)
+                .stroke(Color.white.opacity(0.25), lineWidth: 2)
+        )
+        .shadow(color: vehicle.accent.opacity(0.45), radius: 22, y: 8)
+    }
+}
+
+struct MyDataView: View {
+    @EnvironmentObject private var vehicles: VehicleStore
+    @EnvironmentObject private var trips: TripStore
+    @State private var showingGarage = false
+
+    private var vehicle: Vehicle? { vehicles.vehicle }
+    private var accent: Color { vehicle?.accent ?? .red }
+
+    private var totalDistance: Double {
+        trips.trips.reduce(0) { $0 + $1.distanceMeters }
+    }
+
+    private var bestScore: Int {
+        trips.trips.map(\.score).max() ?? 0
+    }
+
+    var body: some View {
+        ZStack {
+            CockpitBackground(accent: accent)
+
+            ScrollView {
+                VStack(spacing: 20) {
+                    if let vehicle {
+                        VStack(spacing: 14) {
+                            VehicleBadge(vehicle: vehicle)
+                            VStack(spacing: 4) {
+                                Text(vehicle.brandModel.isEmpty ? vehicle.nickname : vehicle.brandModel)
+                                    .font(.title2.bold())
+                                Text(vehicle.nickname)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.top, 16)
+
+                        CockpitCard {
+                            VStack(spacing: 12) {
+                                DataRow(title: "Vehículo", value: vehicle.brandModel.isEmpty ? vehicle.nickname : vehicle.brandModel)
+                                Divider().background(Color.white.opacity(0.1))
+                                DataRow(title: "Matrícula", value: vehicle.plate.isEmpty ? "Sin matrícula" : vehicle.plate)
+                                Divider().background(Color.white.opacity(0.1))
+                                DataRow(title: "Diseño", value: vehicle.design.title)
+                                Divider().background(Color.white.opacity(0.1))
+                                DataRow(title: "Color", value: AppAccent(rawValue: vehicle.accentRaw)?.label ?? "Rojo")
+                            }
+                        }
+
+                        CockpitCard {
+                            HStack {
+                                CockpitStat(title: "Viajes", value: "\(trips.trips.count)", accent: accent)
+                                CockpitStat(title: "Distancia", value: trips.distanceText(totalDistance), accent: accent)
+                                CockpitStat(title: "Mejor", value: bestScore == 0 ? "—" : "\(bestScore)", accent: accent)
+                            }
+                        }
+
+                        Button {
+                            showingGarage = true
+                        } label: {
+                            Label("Editar mis datos", systemImage: "pencil")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding(14)
+                                .background(accent, in: RoundedRectangle(cornerRadius: 16))
+                                .foregroundStyle(.white)
+                        }
+
+                        Text("Tus datos se guardan solo en este iPhone. No hay cuentas ni servidores.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .padding()
+            }
+        }
+        .navigationTitle("Mis datos")
+        .sheet(isPresented: $showingGarage) {
+            GarageSetupView(vehicle: vehicles.vehicle)
+                .environmentObject(vehicles)
+        }
+    }
+}
+
+struct DataRow: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        HStack {
+            Text(title)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .fontWeight(.semibold)
+                .multilineTextAlignment(.trailing)
+        }
+        .font(.subheadline)
     }
 }
 
@@ -459,10 +609,11 @@ struct HomeView: View {
                         columns: [GridItem(.flexible()), GridItem(.flexible())],
                         spacing: 12
                     ) {
-                        QuickAction(title: "Vídeo y AirPlay", icon: "tv.fill", color: .blue) { selectedTab = 1 }
-                        QuickAction(title: "Mis viajes", icon: "map.fill", color: .purple) { selectedTab = 2 }
-                        QuickAction(title: "Widgets", icon: "square.grid.2x2.fill", color: .orange) { selectedTab = 3 }
-                        QuickAction(title: "Sonidos", icon: "speaker.wave.2.fill", color: .green) { selectedTab = 4 }
+                        QuickAction(title: "Vídeo y AirPlay", icon: "tv.fill", color: .blue) { selectedTab = 2 }
+                        QuickAction(title: "Mis datos", icon: "car.sport.fill", color: .red) { selectedTab = 1 }
+                        QuickAction(title: "Mis viajes", icon: "map.fill", color: .purple) { selectedTab = 3 }
+                        QuickAction(title: "Widgets", icon: "square.grid.2x2.fill", color: .orange) { selectedTab = 4 }
+                        QuickAction(title: "Sonidos", icon: "speaker.wave.2.fill", color: .green) { selectedTab = 5 }
                     }
 
                     if let last = trips.trips.first {

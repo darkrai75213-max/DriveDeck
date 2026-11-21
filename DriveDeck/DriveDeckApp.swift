@@ -72,21 +72,24 @@ struct ContentView: View {
             HomeView(selectedTab: $selectedTab)
                 .tabItem { Label("Inicio", systemImage: "gauge.with.dots.needle.50percent") }
                 .tag(0)
+            MyDataView()
+                .tabItem { Label("Mis datos", systemImage: "car.sport.fill") }
+                .tag(1)
             CastView()
                 .tabItem { Label("Cast", systemImage: "tv") }
-                .tag(1)
+                .tag(2)
             DriveView()
                 .tabItem { Label("Drive", systemImage: "car.fill") }
-                .tag(2)
+                .tag(3)
             WidgetsGuideView()
                 .tabItem { Label("Widgets", systemImage: "square.grid.2x2") }
-                .tag(3)
+                .tag(4)
             SoundsView()
                 .tabItem { Label("Sonidos", systemImage: "speaker.wave.2") }
-                .tag(4)
+                .tag(5)
             SettingsView()
                 .tabItem { Label("Ajustes", systemImage: "gearshape") }
-                .tag(5)
+                .tag(6)
         }
         .environmentObject(vehicles)
         .fullScreenCover(isPresented: Binding(

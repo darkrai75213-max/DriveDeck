@@ -72,6 +72,7 @@ expected_types = [
     "SoundsView", "WidgetsGuideView", "WidgetConfigIntent", "DriveDeckWidget",
     "ExternalDisplayManager", "M3UParser", "AppIntentConfiguration",
     "VehicleStore", "GarageSetupView", "HomeView", "SpeedRing",
+    "MyDataView", "VehicleBadge", "SEAT Ibiza",
 ]
 for name in expected_types:
     if name not in sources:

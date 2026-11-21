@@ -9,7 +9,8 @@ Es una implementación original: no usa el nombre, el logo ni los recursos de la
 | Función de la referencia | Implementación en DriveDeck |
 |---|---|
 | Salpicadero de inicio y diseños de vehículo/marca | ✅ pantalla **Inicio** oscura tipo cockpit, con anillo de velocidad, tarjetas, accesos rápidos y último viaje |
-| Elección de coche al empezar | ✅ **Garaje** de primer arranque (diseño, nombre, marca/modelo, matrícula y color) + editable en Ajustes |
+| Elección de coche al empezar | ✅ **SEAT Ibiza por defecto** (nickname "Mi Ibiza", diseño deportivo, acento rojo). Se puede cambiar en el Garaje y hay un atajo "Usar SEAT Ibiza". |
+| "Mis datos" con icono del coche | ✅ pestaña **Mis datos** con insignia del Ibiza, ficha (marca/modelo, matrícula, diseño, color) y estadísticas |
 | Listas IPTV M3U/M3U8 propias, navegación de canales, búsqueda, recarga | ✅ `Cast` → Listas IPTV (parser `#EXTINF`, `group-title`, URLs relativas) |
 | Vídeos locales desde Fotos y desde Archivos | ✅ `Cast` → Vídeos locales (se copian al almacenamiento de la app) |
 | Reproductor con AirPlay / pantalla externa | ✅ `AVPlayer` + selector de rutas de vídeo + render en `UIScreen` externa |
