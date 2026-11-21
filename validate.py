@@ -9,6 +9,15 @@ ROOT = Path(__file__).resolve().parent
 errors = []
 warnings = []
 
+# 0. Símbolos que deben existir (se han movido entre archivos)
+root_swift = "\n".join(
+    path.read_text(encoding="utf-8", errors="replace")
+    for path in (ROOT / "DriveDeck").rglob("*.swift")
+)
+for symbol in ["TransmitView", "ProfileView", "TripView"]:
+    if f"struct {symbol}" not in root_swift:
+        errors.append(f"Falta la definición de {symbol}")
+
 # 1. Todos los ficheros referenciados en el pbxproj existen
 pbx = (ROOT / "DriveDeck.xcodeproj" / "project.pbxproj").read_text(encoding="utf-8")
 refs = re.findall(r"path = ([^;]+); sourceTree", pbx)
@@ -68,7 +77,7 @@ for swift in ROOT.rglob("*.swift"):
 # 6. Referencias cruzadas de tipos usados en el proyecto
 sources = "\n".join(p.read_text(encoding="utf-8") for p in ROOT.rglob("*.swift"))
 expected_types = [
-    "MediaStore", "TripStore", "SoundManager", "CastView", "DriveView",
+    "MediaStore", "TripStore", "SoundManager", "TransmitView", "TripView",
     "SoundsView", "WidgetsGuideView", "WidgetConfigIntent", "DriveDeckWidget",
     "ExternalDisplayManager", "M3UParser", "AppIntentConfiguration",
     "VehicleStore", "GarageSetupView", "HomeView", "SpeedRing",

@@ -90,21 +90,22 @@ final class VehicleStore: ObservableObject {
         didSet { persist() }
     }
 
+    static let ibiza = Vehicle(
+        nickname: "Mi Ibiza",
+        brandModel: "SEAT Ibiza",
+        plate: "",
+        design: .sport,
+        accentRaw: "red"
+    )
+
     private let key = "drivedeck.vehicle"
 
     init() {
         guard let data = UserDefaults.standard.data(forKey: key) else {
-            // Valor por defecto: solo tú usas la app.
-            vehicle = Vehicle(
-                nickname: "Mi Ibiza",
-                brandModel: "SEAT Ibiza",
-                plate: "",
-                design: .sport,
-                accentRaw: "red"
-            )
+            vehicle = Self.ibiza
             return
         }
-        vehicle = try? JSONDecoder().decode(Vehicle.self, from: data)
+        vehicle = (try? JSONDecoder().decode(Vehicle.self, from: data)) ?? Self.ibiza
     }
 
     var needsSetup: Bool { vehicle == nil }
@@ -243,7 +244,7 @@ struct GarageSetupView: View {
                             .shadow(color: accent.opacity(0.5), radius: 18)
                         Text(isEditing ? "Editar vehículo" : "Elige tu coche")
                             .font(.title.bold())
-                        Text("El diseño se aplica al salpicadero, a los widgets y a la identidad visual de DriveDeck.")
+                        Text("Configura tu SEAT Ibiza 40 Aniversario 2024 con llantas de 16\". El estilo se aplica al salpicadero y a los widgets.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
@@ -252,7 +253,7 @@ struct GarageSetupView: View {
 
                     CockpitCard {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("DISEÑO DEL VEHÍCULO")
+                            Text("MARCA Y MODELO")
                                 .font(.caption.weight(.bold))
                                 .foregroundStyle(.secondary)
 
@@ -260,7 +261,7 @@ struct GarageSetupView: View {
                                 columns: [GridItem(.flexible()), GridItem(.flexible())],
                                 spacing: 12
                             ) {
-                                ForEach(VehicleDesign.allCases) { item in
+                                ForEach(VehicleDesign.allCases.filter { $0 == .sport }) { item in
                                     Button {
                                         design = item
                                         switch item {
@@ -572,7 +573,7 @@ struct HomeView: View {
                                     }
                                 }
                                 Spacer()
-                                Button("Cambiar") { showingGarage = true }
+                                Button("Editar") { showingGarage = true }
                                     .font(.caption.bold())
                                     .buttonStyle(.bordered)
                             }

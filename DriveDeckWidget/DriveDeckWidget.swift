@@ -1,11 +1,13 @@
 import WidgetKit
 import SwiftUI
 import AppIntents
+import PhotosUI
+import OSLog
 
 // MARK: - Opciones configurables desde el widget
 
 enum WidgetStyle: String, AppEnum {
-    case clock, date, countdown, plate, brand
+    case clock, date, countdown, plate, brand, photo
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Estilo")
 
@@ -14,7 +16,8 @@ enum WidgetStyle: String, AppEnum {
         .date: DisplayRepresentation(title: "Fecha"),
         .countdown: DisplayRepresentation(title: "Cuenta atrás"),
         .plate: DisplayRepresentation(title: "Matrícula"),
-        .brand: DisplayRepresentation(title: "Diseño de marca")
+        .brand: DisplayRepresentation(title: "Diseño de marca"),
+        .photo: DisplayRepresentation(title: "Foto de mi galería")
     ]
 }
 
@@ -77,6 +80,9 @@ struct WidgetConfigIntent: AppIntent, WidgetConfigurationIntent {
     @Parameter(title: "Cuenta atrás")
     var countdown: Date?
 
+    @Parameter(title: "Foto")
+    var photo: PhotosFile?
+
     // WidgetConfigurationIntent exige parámetros opcionales. Los valores por
     // defecto se resuelven aquí para que el widget nunca quede vacío.
     init() {
@@ -108,21 +114,42 @@ struct WidgetConfigIntent: AppIntent, WidgetConfigurationIntent {
 struct WidgetEntry: TimelineEntry {
     let date: Date
     let config: WidgetConfigIntent
+    let photo: UIImage?
+}
+
+private enum WidgetPhotoLoader {
+    static func load(_ file: PhotosFile?) -> UIImage? {
+        guard let file else { return nil }
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: UIImage?
+        Task {
+            defer { semaphore.signal() }
+            do {
+                let data = try await file.data
+                result = UIImage(data: data)
+            } catch {
+                os_log("DriveDeck widget photo error: %{public}@", log: .default, type: .error, String(describing: error))
+            }
+        }
+        semaphore.wait()
+        return result
+    }
 }
 
 struct WidgetProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> WidgetEntry {
-        WidgetEntry(date: Date(), config: WidgetConfigIntent())
+        WidgetEntry(date: Date(), config: WidgetConfigIntent(), photo: nil)
     }
 
     func snapshot(for configuration: WidgetConfigIntent, in context: Context) async -> WidgetEntry {
-        WidgetEntry(date: Date(), config: configuration)
+        WidgetEntry(date: Date(), config: configuration, photo: WidgetPhotoLoader.load(configuration.photo))
     }
 
     func timeline(for configuration: WidgetConfigIntent, in context: Context) async -> Timeline<WidgetEntry> {
         let now = Date()
+        let photo = WidgetPhotoLoader.load(configuration.photo)
         let entries = stride(from: 0, to: 4, by: 1).map { index in
-            WidgetEntry(date: now.addingTimeInterval(Double(index) * 900), config: configuration)
+            WidgetEntry(date: now.addingTimeInterval(Double(index) * 900), config: configuration, photo: photo)
         }
         return Timeline(entries: entries, policy: .after(now.addingTimeInterval(900)))
     }
@@ -147,6 +174,8 @@ struct WidgetEntryView: View {
                 PlateWidget(entry: entry)
             case .brand:
                 BrandWidget(entry: entry)
+            case .photo:
+                PhotoWidget(entry: entry)
             }
         }
         .containerBackground(for: .widget) {
@@ -314,6 +343,39 @@ struct BrandWidget: View {
     }
 }
 
+struct PhotoWidget: View {
+    let entry: WidgetEntry
+
+    var body: some View {
+        ZStack {
+            if let image = entry.photo {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                VStack(spacing: 8) {
+                    Image(systemName: "photo.on.rectangle.angled")
+                        .font(.largeTitle)
+                    Text("Elige una foto al editar el widget")
+                        .font(.caption2)
+                        .multilineTextAlignment(.center)
+                }
+                .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
+        .overlay(alignment: .bottom) {
+            Text(entry.config.resolvedTitle)
+                .font(.caption2.bold())
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(.black.opacity(0.55), in: Capsule())
+                .padding(6)
+        }
+    }
+}
+
 @main
 struct DriveDeckWidget: Widget {
     let kind: String = "DriveDeckWidget"
@@ -327,7 +389,7 @@ struct DriveDeckWidget: Widget {
             WidgetEntryView(entry: entry)
         }
         .configurationDisplayName("DriveDeck")
-        .description("Reloj, fecha, cuenta atrás, matrícula y diseños de coche.")
+        .description("Reloj, fecha, cuenta atrás, matrícula, diseños de coche y tus fotos.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }

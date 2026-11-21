@@ -22,6 +22,7 @@ struct DriveDeckApp: App {
                     sounds.configureSession()
                     sounds.installDefaultSoundsIfNeeded()
                     _ = ExternalDisplayManager.shared
+                    if TripStore.shared.autoDetect { TripStore.shared.startMonitoringIfNeeded() }
                 }
         }
     }
@@ -69,27 +70,21 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            HomeView(selectedTab: $selectedTab)
-                .tabItem { Label("Inicio", systemImage: "gauge.with.dots.needle.50percent") }
+            TransmitView()
+                .tabItem { Label("transmitir", systemImage: "tv") }
                 .tag(0)
-            MyDataView()
-                .tabItem { Label("Mis datos", systemImage: "car.sport.fill") }
+            TripView()
+                .tabItem { Label("recorrido", systemImage: "map.fill") }
                 .tag(1)
-            CastView()
-                .tabItem { Label("Cast", systemImage: "tv") }
-                .tag(2)
-            DriveView()
-                .tabItem { Label("Drive", systemImage: "car.fill") }
-                .tag(3)
             WidgetsGuideView()
-                .tabItem { Label("Widgets", systemImage: "square.grid.2x2") }
-                .tag(4)
+                .tabItem { Label("widgets", systemImage: "square.grid.2x2") }
+                .tag(2)
             SoundsView()
-                .tabItem { Label("Sonidos", systemImage: "speaker.wave.2") }
-                .tag(5)
-            SettingsView()
-                .tabItem { Label("Ajustes", systemImage: "gearshape") }
-                .tag(6)
+                .tabItem { Label("sonidos", systemImage: "speaker.wave.2") }
+                .tag(3)
+            ProfileView()
+                .tabItem { Label("perfil", systemImage: "person.crop.circle.fill") }
+                .tag(4)
         }
         .environmentObject(vehicles)
         .fullScreenCover(isPresented: Binding(

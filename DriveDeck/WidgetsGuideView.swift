@@ -5,7 +5,7 @@ struct WidgetsGuideView: View {
         ("1", "Mantén pulsado un espacio vacío de la pantalla de inicio hasta que los iconos bailen."),
         ("2", "Pulsa el botón «+» de la esquina superior izquierda."),
         ("3", "Busca DriveDeck y elige el tamaño pequeño, mediano o grande."),
-        ("4", "Mantén pulsado el widget y elige «Editar widget» para seleccionar estilo, diseño, color, matrícula, título y cuenta atrás.")
+        ("4", "Mantén pulsado el widget y elige «Editar widget» para seleccionar estilo, diseño, color, matrícula, título, cuenta atrás o una foto de tu galería.")
     ]
 
     var body: some View {
@@ -42,7 +42,7 @@ struct WidgetsGuideView: View {
 
                     VStack(alignment: .leading, spacing: 8) {
                         Label("Estilos disponibles", systemImage: "sparkles").font(.headline)
-                        Text("• Reloj: hora actual y fecha.\n• Fecha: día destacado con diseño de vehículo.\n• Cuenta atrás: días, horas y minutos hasta la fecha que elijas.\n• Matrícula: placa personalizable con estilo de país.\n• Marca: diseño deportivo, neutro, lujo o eléctrico.")
+                        Text("• Reloj: hora actual y fecha.\n• Fecha: día destacado con diseño de vehículo.\n• Cuenta atrás: días, horas y minutos hasta la fecha que elijas.\n• Matrícula: placa personalizable con estilo de país.\n• Marca: diseño deportivo, neutro, lujo o eléctrico.\n• Foto: elige una imagen de tu galería al editar el widget.")
                             .font(.subheadline).foregroundStyle(.secondary)
                     }
 
