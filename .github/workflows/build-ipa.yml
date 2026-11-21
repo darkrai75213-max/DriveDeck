@@ -60,6 +60,10 @@ jobs:
             echo "ERROR: CFBundleExecutable del widget no válido"
             exit 1
           }
+          # actool no genera el 3x con este catalogo: se añade explícitamente
+          ICONSET="$GITHUB_WORKSPACE/DriveDeck/Assets.xcassets/AppIcon.appiconset"
+          cp "$ICONSET/Icon-60@3x.png" Payload/DriveDeck.app/AppIcon60x60@3x.png
+          cp "$ICONSET/Icon-60@2x.png" Payload/DriveDeck.app/AppIcon60x60@2x.png
           test -f Payload/DriveDeck.app/AppIcon60x60@3x.png || {
             echo "ERROR: falta el icono de 180x180 para iPhone"
             exit 1
