@@ -80,8 +80,12 @@ struct WidgetConfigIntent: AppIntent, WidgetConfigurationIntent {
     @Parameter(title: "Cuenta atrás")
     var countdown: Date?
 
-    @Parameter(title: "Foto")
-    var photo: PhotosFile?
+    @Parameter(
+        title: "Foto",
+        description: "Elige una imagen de tu galería",
+        supportedTypeIdentifiers: ["public.image"]
+    )
+    var photo: IntentFile?
 
     // WidgetConfigurationIntent exige parámetros opcionales. Los valores por
     // defecto se resuelven aquí para que el widget nunca quede vacío.
@@ -118,8 +122,11 @@ struct WidgetEntry: TimelineEntry {
 }
 
 private enum WidgetPhotoLoader {
-    static func load(_ file: PhotosFile?) -> UIImage? {
+    static func load(_ file: IntentFile?) -> UIImage? {
         guard let file else { return nil }
+        if let url = file.fileURL, let data = try? Data(contentsOf: url) {
+            return UIImage(data: data)
+        }
         let semaphore = DispatchSemaphore(value: 0)
         var result: UIImage?
         Task {
