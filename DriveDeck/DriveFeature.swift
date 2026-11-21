@@ -344,7 +344,7 @@ struct RouteMap: UIViewRepresentable {
         let polyline = MKPolyline(coordinates: points, count: points.count)
         map.addOverlay(polyline)
         let rect = polyline.boundingMapRect
-        let region = MKCoordinateRegionForMapRect(rect)
+        let region = MKCoordinateRegion(rect)
         map.setRegion(map.regionThatFits(region), animated: context.coordinator.didRender)
         context.coordinator.didRender = true
     }

@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import AVFoundation
+import AVKit
 import WebKit
 import PhotosUI
 import UniformTypeIdentifiers
@@ -522,7 +523,7 @@ struct CastView: View {
                 if let item = media.currentItem {
                     Section("Reproduciendo") {
                         HStack {
-                            Image(systemName: itemIcon(item)).foregroundStyle(.accent)
+                            Image(systemName: itemIcon(item)).foregroundStyle(Color.accentColor)
                             Text(item.title).lineLimit(1)
                             Spacer()
                             Button {

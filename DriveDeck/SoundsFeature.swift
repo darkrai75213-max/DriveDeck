@@ -256,7 +256,7 @@ struct SoundsView: View {
                     ForEach(SoundSlot.allCases) { slot in
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                Image(systemName: slot.icon).foregroundStyle(.accent)
+                                Image(systemName: slot.icon).foregroundStyle(Color.accentColor)
                                 Text(slot.rawValue).font(.headline)
                                 Spacer()
                                 Button("Probar") { sounds.play(slot: slot) }

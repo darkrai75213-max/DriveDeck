@@ -14,7 +14,7 @@ struct WidgetsGuideView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     Image(systemName: "square.grid.2x2.fill")
                         .font(.system(size: 56))
-                        .foregroundStyle(.accent)
+                        .foregroundStyle(Color.accentColor)
                         .frame(maxWidth: .infinity)
 
                     Text("Widgets de pantalla de inicio")
@@ -31,7 +31,7 @@ struct WidgetsGuideView: View {
                                     .font(.headline.bold())
                                     .foregroundStyle(.white)
                                     .frame(width: 26, height: 26)
-                                    .background(.accent, in: Circle())
+                                    .background(Color.accentColor, in: Circle())
                                 Text(text)
                                     .font(.subheadline)
                             }
