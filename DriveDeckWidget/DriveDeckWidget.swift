@@ -59,23 +59,35 @@ struct WidgetConfigIntent: AppIntent, WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Configurar DriveDeck"
     static let description: IntentDescription? = IntentDescription("Elige el estilo y el diseño del widget.")
 
-    @Parameter(title: "Estilo", default: .clock)
+    @Parameter(title: "Estilo")
     var style: WidgetStyle
 
-    @Parameter(title: "Diseño", default: .neutral)
+    @Parameter(title: "Diseño")
     var brand: BrandTheme
 
-    @Parameter(title: "Color", default: .blue)
+    @Parameter(title: "Color")
     var tint: WidgetTint
 
-    @Parameter(title: "Matrícula", default: "ABC 123")
+    @Parameter(title: "Matrícula")
     var plate: String
 
-    @Parameter(title: "Título", default: "DriveDeck")
+    @Parameter(title: "Título")
     var title: String
 
-    @Parameter(title: "Cuenta atrás", default: Date())
+    @Parameter(title: "Cuenta atrás")
     var countdown: Date
+
+    // Los valores por defecto se asignan aquí: el inicializador de @Parameter
+    // con `default:` solo existe a partir de iOS 18 y el proyecto soporta iOS 17.
+    init() {
+        style = .clock
+        brand = .neutral
+        tint = .blue
+        plate = "ABC 123"
+        title = "DriveDeck"
+        countdown = Calendar.current.date(byAdding: .day, value: 1, to: Date())
+            ?? Date().addingTimeInterval(86_400)
+    }
 }
 
 // MARK: - Timeline
