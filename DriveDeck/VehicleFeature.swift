@@ -629,7 +629,7 @@ struct HomeView: View {
                                         .font(.headline.bold())
                                         .foregroundStyle(accent)
                                 }
-                                RouteMap(points: last.points.map(\.clLocation))
+                                RouteMap(points: last.displayPoints.map(\.clLocation))
                                     .frame(height: 150)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                                 Text("\(trips.distanceText(last.distanceMeters)) · \(last.durationText) · \(last.start.formatted(date: .abbreviated, time: .shortened))")

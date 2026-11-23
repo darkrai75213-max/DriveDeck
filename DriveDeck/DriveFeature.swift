@@ -15,6 +15,11 @@ struct Coordinate: Codable, Hashable {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 
+    init(latitude: Double, longitude: Double) {
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+
     init(_ location: CLLocation) {
         latitude = location.coordinate.latitude
         longitude = location.coordinate.longitude
@@ -54,6 +59,7 @@ struct Trip: Codable, Identifiable, Hashable {
     var averageSpeedKmh: Double
     var events: [HarshEvent]
     var score: Int
+    var roadPoints: [Coordinate]?
 
     // Telemetría avanzada (todo lo que aportan los sensores del iPhone)
     var maxG: Double
@@ -79,6 +85,7 @@ struct Trip: Codable, Identifiable, Hashable {
         averageSpeedKmh: Double,
         events: [HarshEvent],
         score: Int,
+        roadPoints: [Coordinate]? = nil,
         maxG: Double = 0,
         maxLateralG: Double = 0,
         maxLongitudinalG: Double = 0,
@@ -101,6 +108,7 @@ struct Trip: Codable, Identifiable, Hashable {
         self.averageSpeedKmh = averageSpeedKmh
         self.events = events
         self.score = score
+        self.roadPoints = roadPoints
         self.maxG = maxG
         self.maxLateralG = maxLateralG
         self.maxLongitudinalG = maxLongitudinalG
@@ -126,6 +134,7 @@ struct Trip: Codable, Identifiable, Hashable {
         averageSpeedKmh = try c.decode(Double.self, forKey: .averageSpeedKmh)
         events = try c.decode([HarshEvent].self, forKey: .events)
         score = try c.decode(Int.self, forKey: .score)
+        roadPoints = try c.decodeIfPresent([Coordinate].self, forKey: .roadPoints)
         maxG = try c.decodeIfPresent(Double.self, forKey: .maxG) ?? 0
         maxLateralG = try c.decodeIfPresent(Double.self, forKey: .maxLateralG) ?? 0
         maxLongitudinalG = try c.decodeIfPresent(Double.self, forKey: .maxLongitudinalG) ?? 0
@@ -137,6 +146,12 @@ struct Trip: Codable, Identifiable, Hashable {
         steps = try c.decodeIfPresent(Int.self, forKey: .steps) ?? 0
         drivingTime = try c.decodeIfPresent(TimeInterval.self, forKey: .drivingTime) ?? 0
         idleTime = try c.decodeIfPresent(TimeInterval.self, forKey: .idleTime) ?? 0
+    }
+
+    /// Geometría que se dibuja: la ruta por carretera si se pudo calcular, si no los puntos GPS.
+    var displayPoints: [Coordinate] {
+        if let roadPoints, roadPoints.count > 1 { return roadPoints }
+        return points
     }
 
     var leftCurves: Int { events.filter { $0.kind == .cornering && $0.direction == "izquierda" }.count }
@@ -158,13 +173,13 @@ struct Trip: Codable, Identifiable, Hashable {
 final class LocationManager: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
 
-    var onLocation: ((CLLocation) -> Void)?
+    var onLocations: (([CLLocation]) -> Void)?
 
     override init() {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBest
-        manager.distanceFilter = 8
+        manager.distanceFilter = 5
         manager.allowsBackgroundLocationUpdates = true
         manager.pausesLocationUpdatesAutomatically = false
         manager.activityType = .automotiveNavigation
@@ -183,8 +198,12 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }
-        DispatchQueue.main.async { self.onLocation?(location) }
+        guard !locations.isEmpty else { return }
+        // iOS agrupa varias posiciones cuando la app está en segundo plano.
+        // Hay que procesarlas TODAS en orden cronológico: usar solo .last
+        // produce líneas rectas y pierde kilómetros reales.
+        let ordered = locations.sorted { $0.timestamp < $1.timestamp }
+        DispatchQueue.main.async { self.onLocations?(ordered) }
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {}
@@ -358,10 +377,14 @@ final class TripStore: ObservableObject {
         useKilometers = UserDefaults.standard.object(forKey: "drivedeck.use.km") as? Bool ?? true
         autoDetect = UserDefaults.standard.object(forKey: "drivedeck.auto.trips") as? Bool ?? true
 
-        locationManager.onLocation = { [weak self] location in
+        locationManager.onLocations = { [weak self] locations in
             guard let self else { return }
-            self.ingest(location)
-            if self.autoDetect && !self.isRecording { self.evaluateAutoStart(speed: location.speed * 3.6) }
+            for location in locations {
+                self.ingest(location)
+                if self.autoDetect && !self.isRecording {
+                    self.evaluateAutoStart(speed: location.speed * 3.6)
+                }
+            }
         }
         motionManager.onSample = { [weak self] sample in
             Task { @MainActor in self?.ingestMotion(sample) }
@@ -500,11 +523,23 @@ final class TripStore: ObservableObject {
         message = "Viaje guardado · \(score)/100"
         sendNotification(for: trip)
         if autoDetect { stationarySince = nil }
+
+        // La distancia se calcula con el GPS real; la geometría se ajusta
+        // a las carreteras en segundo plano para que el trazado no sea recto.
+        Task { [weak self] in
+            guard let self, let snapped = await self.roadSnappedPoints(for: trip.points) else { return }
+            var updated = trip
+            updated.roadPoints = snapped
+            if let index = self.trips.firstIndex(where: { $0.id == trip.id }) {
+                self.trips[index] = updated
+                self.save()
+            }
+        }
     }
 
     private func ingest(_ location: CLLocation) {
         if isRecording {
-            guard location.horizontalAccuracy >= 0, location.horizontalAccuracy < 65 else { return }
+            guard location.horizontalAccuracy >= 0, location.horizontalAccuracy < 100 else { return }
             let speed = max(0, location.speed) * 3.6
             liveSpeedKmh = speed
             speedSamples.append(speed)
@@ -513,7 +548,14 @@ final class TripStore: ObservableObject {
 
             if let previous = lastLocation {
                 let delta = location.distance(from: previous)
-                if delta < 500 { currentDistance += delta }
+                let interval = max(0, location.timestamp.timeIntervalSince(previous.timestamp))
+                // Solo descarta saltos físicamente imposibles (> 400 km/h).
+                // Antes se descartaba todo salto >= 500 m y por eso un viaje
+                // de 30 km se quedaba en ~1 km cuando el GPS agrupaba puntos.
+                let plausibleMax = max(120, interval * 115)
+                if delta <= plausibleMax {
+                    currentDistance += delta
+                }
             }
             lastLocation = location
             currentPoints.append(Coordinate(location))
@@ -552,6 +594,63 @@ final class TripStore: ObservableObject {
     private func addEvent(kind: HarshKind, direction: String?, magnitude: Double) {
         guard isRecording else { return }
         currentEvents.append(HarshEvent(kind: kind, direction: direction, magnitude: magnitude))
+    }
+
+    /// Ajusta los puntos GPS a la geometría real de la carretera mediante MKDirections.
+    /// Si no hay red o falla, se conservan los puntos GPS originales.
+    private func roadSnappedPoints(for points: [Coordinate]) async -> [Coordinate]? {
+        guard points.count > 2 else { return nil }
+
+        var waypoints: [CLLocationCoordinate2D] = []
+        var last: CLLocation?
+        for point in points {
+            let loc = CLLocation(latitude: point.latitude, longitude: point.longitude)
+            if let previous = last, loc.distance(from: previous) < 250 { continue }
+            waypoints.append(loc.coordinate)
+            last = loc
+        }
+        if let first = points.first {
+            let same = waypoints.first.map { $0.latitude == first.latitude && $0.longitude == first.longitude } ?? false
+            if !same { waypoints.insert(first.clLocation, at: 0) }
+        }
+        if let final = points.last {
+            let same = waypoints.last.map { $0.latitude == final.latitude && $0.longitude == final.longitude } ?? false
+            if !same { waypoints.append(final.clLocation) }
+        }
+        guard waypoints.count > 1 else { return nil }
+
+        var snapped: [CLLocationCoordinate2D] = []
+        let chunkSize = 8
+        var index = 0
+        while index < waypoints.count - 1 {
+            let end = min(index + chunkSize, waypoints.count - 1)
+            let request = MKDirections.Request()
+            request.source = MKMapItem(placemark: MKPlacemark(coordinate: waypoints[index]))
+            request.destination = MKMapItem(placemark: MKPlacemark(coordinate: waypoints[end]))
+            request.transportType = .automotive
+            request.requestsAlternateRoutes = false
+
+            let segment: [CLLocationCoordinate2D]
+            if let response = try? await MKDirections(request: request).calculate(),
+               let route = response.routes.first {
+                let polyline = route.polyline
+                let pointer = polyline.points()
+                segment = (0..<polyline.coordinateCount).map { pointer[$0] }
+            } else {
+                segment = Array(waypoints[index...end])
+            }
+
+            for coordinate in segment {
+                if let last = snapped.last,
+                   last.latitude == coordinate.latitude,
+                   last.longitude == coordinate.longitude { continue }
+                snapped.append(coordinate)
+            }
+            index = end
+        }
+
+        guard snapped.count > 1 else { return nil }
+        return snapped.map { Coordinate(latitude: $0.latitude, longitude: $0.longitude) }
     }
 
     private func sendNotification(for trip: Trip) {
@@ -776,7 +875,7 @@ struct TripView: View {
                                                 .font(.headline.bold())
                                                 .foregroundStyle(trip.score >= 85 ? .green : trip.score >= 65 ? .orange : .red)
                                         }
-                                        RouteMap(points: trip.points.map(\.clLocation))
+                                        RouteMap(points: trip.displayPoints.map(\.clLocation))
                                             .frame(height: 90)
                                             .clipShape(RoundedRectangle(cornerRadius: 10))
                                             .allowsHitTesting(false)
@@ -807,7 +906,7 @@ struct TripView: View {
             .onAppear { if trips.autoDetect { trips.startMonitoringIfNeeded() } }
             .sheet(isPresented: $showingTerritory) {
                 NavigationStack {
-                    TerritoryMap(routes: trips.trips.map { $0.points.map(\.clLocation) })
+                    TerritoryMap(routes: trips.trips.map { $0.displayPoints.map(\.clLocation) })
                         .ignoresSafeArea()
                         .navigationTitle("Mi territorio")
                         .toolbar { Button("Cerrar") { showingTerritory = false } }
@@ -825,7 +924,7 @@ struct TripDetailView: View {
     var body: some View {
         List {
             Section {
-                RouteMap(points: trip.points.map(\.clLocation))
+                RouteMap(points: trip.displayPoints.map(\.clLocation))
                     .frame(height: 280)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }

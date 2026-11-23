@@ -8,10 +8,10 @@ Es una implementación original: no usa el nombre, el logo ni los recursos de la
 
 | Función de la referencia | Implementación en DriveDeck |
 |---|---|
-| Icono de la app | ✅ icono original de 1024×1024: silueta de hatchback deportivo genérico sobre degradado oscuro con halo rojo (sin logos de marca) |
+| Icono de la app | ✅ icono generado a partir de la imagen que el usuario dejó en la carpeta del proyecto (`E7F851E2-...png`), recortado al cuadro y exportado en todos los tamaños iPhone |
 | Estructura inferior como CarDash | ✅ pestañas **transmitir · recorrido · widgets · sonidos · perfil** |
 | Transmitir | ✅ cuatro secciones: **fuente multimedia**, **videos locales**, **duplicar iphone** y **navegador**, con IPTV, importación de vídeos, AirPlay y webs |
-| Recorrido | ✅ detección automática al conducir, rutas con distancia/duración/velocidad máxima, silueta del mapa, telemetría completa del iPhone (curvas izq/der, frenazos, acelerones, G, giroscopio, altitud, pasos y más) y notificación al terminar cada viaje |
+| Recorrido | ✅ detección automática al conducir, rutas con distancia/duración/velocidad máxima, trazado ajustado a carretera con `MKDirections` (y puntos GPS densos como respaldo), telemetría completa del iPhone (curvas izq/der, frenazos, acelerones, G, giroscopio, altitud, pasos y más) y notificación al terminar cada viaje. La distancia suma **todos** los puntos GPS recibidos (incluidos los agrupados en segundo plano), filtrando solo saltos físicamente imposibles. |
 | Perfil | ✅ tarjeta del **SEAT Ibiza** con foto del Ibiza 40 Aniversario 2024 de 16", km totales, viajes, logros **0/16** y ajustes (detección automática, siempre km/h, color) |
 | Widgets con fotos | ✅ estilo «Foto» que se configura directamente en el widget desde la galería (firma gratuita, sin App Groups) |
 | Salpicadero de inicio y diseños de vehículo/marca | ✅ pantalla **Inicio** oscura tipo cockpit, con anillo de velocidad, tarjetas, accesos rápidos y último viaje |
