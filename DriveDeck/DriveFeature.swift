@@ -636,7 +636,7 @@ final class TripStore: ObservableObject {
                 let polyline = route.polyline
                 let pointer = polyline.points()
                 segment = (0..<polyline.pointCount).map { index in
-                    MKCoordinateForMapPoint(pointer[index])
+                    pointer[index].coordinate
                 }
             } else {
                 segment = Array(waypoints[index...end])
